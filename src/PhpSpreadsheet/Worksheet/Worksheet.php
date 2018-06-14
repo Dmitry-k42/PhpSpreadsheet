@@ -290,6 +290,11 @@ class Worksheet implements IComparable
     private $cachedHighestRow = 1;
 
     /**
+     * Real highest row
+     */
+    private $realHighestRow = 1;
+
+    /**
      * Right-to-left?
      *
      * @var bool
@@ -1088,6 +1093,24 @@ class Worksheet implements IComparable
         }
 
         return $this->getHighestDataRow($column);
+    }
+
+    /**
+     * Get real highest worksheet row
+     *
+     * @return int Highest row number in file
+     */
+    public function getRealHighestRow()
+    {
+        return max($this->realHighestRow, $this->getHighestRow());
+    }
+
+    /**
+     * Set real highest worksheet row
+     */
+    public function setRealHighestRow($rowNum)
+    {
+        $this->realHighestRow = max($this->realHighestRow, $rowNum);
     }
 
     /**

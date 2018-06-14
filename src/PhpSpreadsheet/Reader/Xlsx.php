@@ -620,6 +620,7 @@ class Xlsx extends BaseReader
                     // Read cell?
                     if ($this->getReadFilter() !== null) {
                         $coordinates = Coordinate::coordinateFromString($r);
+                        $docSheet->setRealHighestRow($coordinates[1]);
 
                         if (!$this->getReadFilter()->readCell($coordinates[0], (int) $coordinates[1], $docSheet->getTitle())) {
                             continue;
