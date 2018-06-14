@@ -600,7 +600,7 @@ class Xlsx extends BaseReader
         }
     }
 
-    private function loadSheetData($xmlSheet, $docSheet, $sharedStrings)
+    private function loadSheetData($xmlSheet, $docSheet, $sharedStrings, $styles)
     {
         if ($xmlSheet && $xmlSheet->sheetData
             && (isset($xmlSheet->sheetData->row->c->v) || isset($xmlSheet->sheetData->row->c->f)))
@@ -1427,7 +1427,7 @@ class Xlsx extends BaseReader
     }
 
     private function loadSheet($eleSheet, $sharedStrings, $excel, $worksheets, $zip, $dir,
-                                        $xmlWorkbook, &$unparsedLoadedData, $oldSheetId, $dxfs, $pFilename)
+                                        $xmlWorkbook, &$unparsedLoadedData, $oldSheetId, $dxfs, $pFilename, $styles)
     {
         // Load sheet
         $docSheet = $excel->createSheet();
@@ -1540,8 +1540,8 @@ class Xlsx extends BaseReader
 
         //~ http://schemas.openxmlformats.org/spreadsheetml/2006/main"
         $xmlParser1->setOnNodeEvent(
-            function ($xmlSheet) use ($docSheet, $sharedStrings) {
-                $this->loadSheetData($xmlSheet, $docSheet, $sharedStrings);
+            function ($xmlSheet) use ($docSheet, $sharedStrings, $styles) {
+                $this->loadSheetData($xmlSheet, $docSheet, $sharedStrings, $styles);
             }
         );
         $xmlParser1->open($xmlFile);
@@ -1659,7 +1659,7 @@ class Xlsx extends BaseReader
     }
 
     private function loadSheetSimpleXML($eleSheet, $sharedStrings, $excel, $worksheets, $zip, $dir,
-                               $xmlWorkbook, &$unparsedLoadedData, $oldSheetId, $dxfs, $pFilename)
+                               $xmlWorkbook, &$unparsedLoadedData, $oldSheetId, $dxfs, $pFilename, $styles)
     {
         // Load sheet
         $docSheet = $excel->createSheet();
@@ -3191,7 +3191,7 @@ class Xlsx extends BaseReader
                             $mapSheetId[$oldSheetId] = $oldSheetId - $countSkippedSheets;
 
                             $this->loadSheet($eleSheet, $sharedStrings, $excel, $worksheets, $zip, $dir, $xmlWorkbook,
-                                $unparsedLoadedData, $oldSheetId, $dxfs, $pFilename);
+                                $unparsedLoadedData, $oldSheetId, $dxfs, $pFilename, $styles);
                             // Next sheet id
                             ++$sheetId;
                         }
