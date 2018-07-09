@@ -1512,8 +1512,8 @@ class Xlsx extends BaseReader
                 $this->loadSheetDataValidations($xmlSheet, $docSheet);
                 $this->loadSheetHyperlinks($xmlSheet, $docSheet, $hyperlinks);
                 $this->loadSheetHeaderFooterImages($xmlSheet, $docSheet, $zip, $dir, $fileWorksheet, $pFilename);
-                $this->loadSheetDrawing($xmlSheet, $docSheet, $drawings,
-                    $unparsedLoadedData, $pFilename, $zip, $relsWorksheet);
+//                $this->loadSheetDrawing($xmlSheet, $docSheet, $drawings,
+//                    $unparsedLoadedData, $pFilename, $zip, $relsWorksheet);
             }
         );
         $xmlParser1->open($xmlFile);
