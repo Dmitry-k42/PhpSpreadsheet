@@ -24,6 +24,28 @@ class XMLParser extends \XMLReader {
         $this->onNodeEvent = $fn;
     }
 
+    private function onNode($rootNode, $skip)
+    {
+        $on = $this->onNodeEvent;
+        if ($on !== null) {
+            $eventCall = true;
+            if (is_array($skip)) {
+                $t = $rootNode;
+                $i = 0;
+                while ($t !== null && $i < count($skip)) {
+                    if ($t->getName() != $skip[$i])
+                        break;
+                    ++$i;
+                    $t = $t->getChild();
+                }
+                if ($i == count($skip))
+                    $eventCall = false;
+            }
+            if ($eventCall)
+                $on($rootNode);
+        }
+    }
+
     public function parse($skip = null)
     {
         $rootNode = null;
@@ -56,30 +78,14 @@ class XMLParser extends \XMLReader {
                         $current->setChild($newNode);
                     $current = $newNode;
                     if ($isEmpty && $current !== null) {
+                        $this->onNode($rootNode, $skip);
                         $current = $current->getParent();
                         if ($current !== null)
                             $current->removeChild();
                     }
                     break;
                 case \XMLReader::END_ELEMENT:
-                    $on = $this->onNodeEvent;
-                    if ($on !== null) {
-                        $eventCall = true;
-                        if (is_array($skip)) {
-                            $t = $rootNode;
-                            $i = 0;
-                            while ($t !== null && $i < count($skip)) {
-                                if ($t->getName() != $skip[$i])
-                                    break;
-                                ++$i;
-                                $t = $t->getChild();
-                            }
-                            if ($i == count($skip))
-                                $eventCall = false;
-                        }
-                        if ($eventCall)
-                            $on($rootNode);
-                    }
+                    $this->onNode($rootNode, $skip);
                     array_splice($nameCounters, $this->depth);
                     if ($current !== null) {
                         $current = $current->getParent();

@@ -602,8 +602,7 @@ class Xlsx extends BaseReader
 
     private function loadSheetData($xmlSheet, $docSheet, $sharedStrings, $styles)
     {
-        if ($xmlSheet && $xmlSheet->sheetData
-            && (isset($xmlSheet->sheetData->row->c->v) || isset($xmlSheet->sheetData->row->c->f)))
+        if ($xmlSheet && $xmlSheet->sheetData->row && isset($xmlSheet->sheetData->row->c))
         {
             foreach ($xmlSheet->sheetData->row as $i => $row) {
                 $cIndex = $i + 1; // Cell Start from 1
@@ -627,87 +626,90 @@ class Xlsx extends BaseReader
                         }
                     }
 
-                    // Read cell!
-                    switch ($cellDataType) {
-                        case 's':
-                            $val = (string) $c->v;
-                            if ($val != '') {
-                                $value = $sharedStrings[(int) $val];
-
-                                if ($value instanceof RichText) {
-                                    $value = clone $value;
-                                }
-                            } else {
-                                $value = '';
-                            }
-
-                            break;
-                        case 'b':
-                            if (!isset($c->f)) {
-                                $value = self::castToBoolean($c);
-                            } else {
-                                // Formula
-                                $this->castToFormula($c, $r, $cellDataType, $value, $calculatedValue, $sharedFormulas, 'castToBoolean');
-                                if (isset($c->f['t'])) {
-                                    $att = $c->f;
-                                    $docSheet->getCell($r)->setFormulaAttributes($att);
-                                }
-                            }
-
-                            break;
-                        case 'inlineStr':
-                            if (isset($c->f)) {
-                                $this->castToFormula($c, $r, $cellDataType, $value, $calculatedValue, $sharedFormulas, 'castToError');
-                            } else {
-                                $value = $this->parseRichText($c->is);
-                            }
-
-                            break;
-                        case 'e':
-                            if (!isset($c->f)) {
-                                $value = self::castToError($c);
-                            } else {
-                                // Formula
-                                $this->castToFormula($c, $r, $cellDataType, $value, $calculatedValue, $sharedFormulas, 'castToError');
-                            }
-
-                            break;
-                        default:
-                            if (!isset($c->f)) {
-                                $value = self::castToString($c);
-                            } else {
-                                // Formula
-                                $this->castToFormula($c, $r, $cellDataType, $value, $calculatedValue, $sharedFormulas, 'castToString');
-                            }
-
-                            break;
-                    }
-
-                    // Check for numeric values
-                    if (is_numeric($value) && $cellDataType != 's') {
-                        if ($value == (int) $value) {
-                            $value = (int) $value;
-                        } elseif ($value == (float) $value) {
-                            $value = (float) $value;
-                        } elseif ($value == (float) $value) {
-                            $value = (float) $value;
-                        }
-                    }
-
-                    // Rich text?
-                    if ($value instanceof RichText && $this->readDataOnly) {
-                        $value = $value->getPlainText();
-                    }
-
                     $cell = $docSheet->getCell($r);
-                    // Assign value
-                    if ($cellDataType != '') {
-                        $cell->setValueExplicit($value, $cellDataType);
-                    } else {
-                        $cell->setValue($value);
-                    }
-                    if ($calculatedValue !== null) {
-                        $cell->setCalculatedValue($calculatedValue);
+
+                    if (isset($xmlSheet->sheetData->row->c->v) || isset($xmlSheet->sheetData->row->c->f)) {
+                        // Read cell!
+                        switch ($cellDataType) {
+                            case 's':
+                                $val = (string)$c->v;
+                                if ($val != '') {
+                                    $value = $sharedStrings[(int)$val];
+
+                                    if ($value instanceof RichText) {
+                                        $value = clone $value;
+                                    }
+                                } else {
+                                    $value = '';
+                                }
+
+                                break;
+                            case 'b':
+                                if (!isset($c->f)) {
+                                    $value = self::castToBoolean($c);
+                                } else {
+                                    // Formula
+                                    $this->castToFormula($c, $r, $cellDataType, $value, $calculatedValue, $sharedFormulas, 'castToBoolean');
+                                    if (isset($c->f['t'])) {
+                                        $att = $c->f;
+                                        $docSheet->getCell($r)->setFormulaAttributes($att);
+                                    }
+                                }
+
+                                break;
+                            case 'inlineStr':
+                                if (isset($c->f)) {
+                                    $this->castToFormula($c, $r, $cellDataType, $value, $calculatedValue, $sharedFormulas, 'castToError');
+                                } else {
+                                    $value = $this->parseRichText($c->is);
+                                }
+
+                                break;
+                            case 'e':
+                                if (!isset($c->f)) {
+                                    $value = self::castToError($c);
+                                } else {
+                                    // Formula
+                                    $this->castToFormula($c, $r, $cellDataType, $value, $calculatedValue, $sharedFormulas, 'castToError');
+                                }
+
+                                break;
+                            default:
+                                if (!isset($c->f)) {
+                                    $value = self::castToString($c);
+                                } else {
+                                    // Formula
+                                    $this->castToFormula($c, $r, $cellDataType, $value, $calculatedValue, $sharedFormulas, 'castToString');
+                                }
+
+                                break;
+                        }
+
+                        // Check for numeric values
+                        if (is_numeric($value) && $cellDataType != 's') {
+                            if ($value == (int)$value) {
+                                $value = (int)$value;
+                            } elseif ($value == (float)$value) {
+                                $value = (float)$value;
+                            } elseif ($value == (float)$value) {
+                                $value = (float)$value;
+                            }
+                        }
+
+                        // Rich text?
+                        if ($value instanceof RichText && $this->readDataOnly) {
+                            $value = $value->getPlainText();
+                        }
+
+                        // Assign value
+                        if ($cellDataType != '') {
+                            $cell->setValueExplicit($value, $cellDataType);
+                        } else {
+                            $cell->setValue($value);
+                        }
+                        if ($calculatedValue !== null) {
+                            $cell->setCalculatedValue($calculatedValue);
+                        }
                     }
 
                     // Style information?
@@ -905,10 +907,10 @@ class Xlsx extends BaseReader
                 $docPageSetup->setFirstPageNumber((int) ($xmlSheet->pageSetup['firstPageNumber']));
             }
 
-            $relAttributes = $xmlSheet->pageSetup->attributes('http://schemas.openxmlformats.org/officeDocument/2006/relationships');
-            if (isset($relAttributes['id'])) {
-                $unparsedLoadedData['sheets'][$docSheet->getCodeName()]['pageSetupRelId'] = (string) $relAttributes['id'];
-            }
+//            $relAttributes = $xmlSheet->pageSetup->attributes('http://schemas.openxmlformats.org/officeDocument/2006/relationships');
+//            if (isset($relAttributes['id'])) {
+//                $unparsedLoadedData['sheets'][$docSheet->getCodeName()]['pageSetupRelId'] = (string) $relAttributes['id'];
+//            }
         }
     }
 
@@ -1427,11 +1429,10 @@ class Xlsx extends BaseReader
         }
     }
 
-    private function loadSheet($eleSheet, $sharedStrings, $excel, $worksheets, $zip, $dir,
+    private function loadSheet(&$docSheet, $eleSheet, $sharedStrings, $excel, $worksheets, $zip, $dir,
                                         $xmlWorkbook, &$unparsedLoadedData, $oldSheetId, $dxfs, $pFilename, $styles)
     {
         // Load sheet
-        $docSheet = $excel->createSheet();
         //    Use false for $updateFormulaCellReferences to prevent adjustment of worksheet
         //        references in formula cells... during the load, all formulae should be correct,
         //        and we're simply bringing the worksheet name in line with the formula, not the
@@ -1490,7 +1491,8 @@ class Xlsx extends BaseReader
         }
 
         //~ http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-        $xmlParser1 = new XMLParser(
+        $xmlParser1 = new XMLParser();
+        $xmlParser1->setOnNodeEvent(
             function ($xmlSheet) use (
                 $docSheet, $columnsAttributes, $rowsAttributes,
                 $sharedStrings, &$conditionals, $dxfs, &$hyperlinks, $dir, $fileWorksheet, $zip, $pFilename,
@@ -3175,6 +3177,7 @@ class Xlsx extends BaseReader
                     $charts = $chartDetails = [];
 
                     if ($xmlWorkbook->sheets) {
+                        $docSheet = null;
                         /** @var SimpleXMLElement $eleSheet */
                         foreach ($xmlWorkbook->sheets->sheet as $eleSheet) {
                             ++$oldSheetId;
@@ -3190,8 +3193,8 @@ class Xlsx extends BaseReader
                             // Map old sheet id in original workbook to new sheet id.
                             // They will differ if loadSheetsOnly() is being used
                             $mapSheetId[$oldSheetId] = $oldSheetId - $countSkippedSheets;
-
-                            $this->loadSheet($eleSheet, $sharedStrings, $excel, $worksheets, $zip, $dir, $xmlWorkbook,
+                            $docSheet = $excel->createSheet();
+                            $this->loadSheet($docSheet, $eleSheet, $sharedStrings, $excel, $worksheets, $zip, $dir, $xmlWorkbook,
                                 $unparsedLoadedData, $oldSheetId, $dxfs, $pFilename, $styles);
                             // Next sheet id
                             ++$sheetId;
