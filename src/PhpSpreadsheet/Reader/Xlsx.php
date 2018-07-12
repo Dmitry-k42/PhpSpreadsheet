@@ -628,7 +628,7 @@ class Xlsx extends BaseReader
 
                     $cell = $docSheet->getCell($r);
 
-                    if (isset($xmlSheet->sheetData->row->c->v) || isset($xmlSheet->sheetData->row->c->f)) {
+                    if (isset($xmlSheet->sheetData->row->c->v) || isset($xmlSheet->sheetData->row->c->f) || isset($xmlSheet->sheetData->row->c->is)) {
                         // Read cell!
                         switch ($cellDataType) {
                             case 's':
@@ -660,8 +660,11 @@ class Xlsx extends BaseReader
                             case 'inlineStr':
                                 if (isset($c->f)) {
                                     $this->castToFormula($c, $r, $cellDataType, $value, $calculatedValue, $sharedFormulas, 'castToError');
-                                } else {
-                                    $value = $this->parseRichText($c->is);
+                                } else if (isset($c->is)) {
+                                    $richText = simplexml_load_string(
+                                        $c->getInnerXml()
+                                    );
+                                    $value = $this->parseRichText($richText);
                                 }
 
                                 break;

@@ -18,6 +18,7 @@ class FakeSimpleXMLElement implements \ArrayAccess, \Iterator
     private $value;
     private $index;
     private $iteratorKey;
+    private $innerXml;
 
     public function __construct($parent, $name, $index = 0)
     {
@@ -29,6 +30,7 @@ class FakeSimpleXMLElement implements \ArrayAccess, \Iterator
         $this->empty = true;
         $this->value = null;
         $this->iteratorKey = true;
+        $this->innerXml = '';
     }
 
     public function getParent()
@@ -59,6 +61,16 @@ class FakeSimpleXMLElement implements \ArrayAccess, \Iterator
     public function isEmpty()
     {
         return $this->empty;
+    }
+
+    public function setInnerXml($str)
+    {
+        $this->innerXml = $str;
+    }
+
+    public function getInnerXml()
+    {
+        return $this->innerXml;
     }
 
     public function __get($name)

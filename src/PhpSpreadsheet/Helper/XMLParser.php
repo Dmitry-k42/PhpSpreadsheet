@@ -72,6 +72,7 @@ class XMLParser extends \XMLReader {
                     $newNode->setAttributes($attribs);
                     $newNode->setValue($value);
                     $newNode->setEmpty($isEmpty);
+                    $newNode->setInnerXml($this->readInnerXml());
                     if ($current === null)
                         $rootNode = $newNode;
                     else
