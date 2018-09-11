@@ -13,15 +13,25 @@ use PhpOffice\PhpSpreadsheet\Helper\XMLParser\FakeSimpleXMLElement;
 
 class XMLParser extends \XMLReader {
     private $onNodeEvent;
+    private $tagsWithInnerXml;
 
     public function __construct($onNodeEvent = null)
     {
         $this->setOnNodeEvent($onNodeEvent);
+        $this->tagsWithInnerXml = [];
     }
 
     public function setOnNodeEvent($fn)
     {
         $this->onNodeEvent = $fn;
+    }
+
+    public function setTagsWithInnerXml($tags)
+    {
+        if (!is_array($tags)) {
+            $tags = [ $tags ];
+        }
+        $this->tagsWithInnerXml = $tags;
     }
 
     private function onNode($rootNode, $skip)
@@ -72,7 +82,9 @@ class XMLParser extends \XMLReader {
                     $newNode->setAttributes($attribs);
                     $newNode->setValue($value);
                     $newNode->setEmpty($isEmpty);
-                    $newNode->setInnerXml($this->readInnerXml());
+                    if (in_array($nodeName, $this->tagsWithInnerXml)) {
+                        $newNode->setInnerXml($this->readInnerXml());
+                    }
                     if ($current === null)
                         $rootNode = $newNode;
                     else

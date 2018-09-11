@@ -1550,6 +1550,7 @@ class Xlsx extends BaseReader
                 $this->loadSheetData($xmlSheet, $docSheet, $sharedStrings, $styles);
             }
         );
+        $xmlParser1->setTagsWithInnerXml(['c']);
         $xmlParser1->open($xmlFile);
         $xmlParser1->parse();
 
